@@ -1,3 +1,5 @@
+-- DDL(Data Definition Language) : 테이블 구조 생성/변경/삭제/작업
+
 -- mariadb 서버에 접속
 mariadb -u root -p
 
@@ -64,6 +66,9 @@ alter table author add column address varchar(255);
 alter table post modify column title varchar(255) not null;
 alter table post modify column contents varchar(3000);
 
--- 테이블 삭제
+-- 테이블 삭제(에러방지 목적으로 if사용)
 show create table post;
-drop table post;
+drop table if exists post;
+
+
+
