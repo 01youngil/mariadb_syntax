@@ -27,7 +27,7 @@ insert into author(id, profile_image) values(8, load_file('파일경로'));--안
 
 -- enum : 삽입될 수 있는 데이터의 종류를 한정하는 데이터 타입
 -- role컬럼 추가
-alter table author add column role enum('user', 'admin') not null;
+alter table author add column role enum('user', 'admin') not null default 'user';
 -- user값 세팅 후 insert
 insert into author(id,role) values(10, 'user');
 -- users값 세팅 후 insert
@@ -47,3 +47,33 @@ select * from author where id not(id < 2 or id >4);
 select * from author where id in(2,3,4);
 -- select * from author where id in(select author_id from post); 로도 응용가능
 select * from author where id not in(1,5); -- 1 <= id <=5 일때
+
+-- like : 특정 문자를 포함하는 데이터를 조회하기 위해 사용하는 키워드
+select * from post where title like '%h'; --h로 끝나는 title 검색
+select * from post where title like 'h%'; --h로 시작하는
+select * from post where title like '%h%'; --h가 들어가는
+
+-- regexp : 정규표현식을 활용한 조회
+select * from post where title regexp '[a-z]'; --하나라도 알파벳 소문자가 들어있으면
+select * from post where title regexp '[가-힣]'; -하나라도 한글이 포함돼있으면
+
+-- 날짜변환 cast, convert : 숫자 -> 날짜, 문자 -> 날짜
+select cast(20241119 as date);
+select cast('20241119' as date);
+select convert(20241119, date);
+select convert('20241119', date);
+-- 문자 -> 숫자 변환
+select cast('12' as unsigned);
+
+-- 날짜조회 방법 ※※
+-- like패턴, 부등호 활용, date_format
+select * from post where created_time like '2024-11%' --문자열조회
+select * from post where created_time >= '2024-01-01' and created_time < '2025-01-01';
+-- date_format
+select date_format(created_time, '%Y-%m-%d') from post;
+select date_format(created_time, '%H:%i:%s') from post;
+select * from post where date_format(created_time, '%Y')='2024';
+select * from post where cast(date_format(created_time, '%Y')='2024'as unsigned) = 2024;
+
+-- 현재날짜,시간
+select now();
