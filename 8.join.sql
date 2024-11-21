@@ -52,3 +52,75 @@ select * from author where id in (select author_id from post);
 select a.email, (select count(*) from post where author_id=a.id) as count from author a; 
 -- from절 안에 서브쿼리
 select a.name from (select * from author) as a;
+
+-- 없어진 기록 찾기 
+-- 서브쿼리
+select * from animal_outs where animal_id not in(select animal_id from animal_ins);
+-- join
+SELECT o.animal_id, o.name from animal_outs o left join animal_ins i
+on i.animal_id = o.animal_id
+where i.animal_id is null
+order by i.animal_id;
+
+-- 집계함수
+-- null은 count 에서 제외
+select count(*) from author;
+select sum(price) from post;
+select avg(price) from post;
+-- 소수점 첫번째자리에서 반올림해서 소수점을 없앰
+select  round(avg(price),1) from post;
+
+-- group by : 그룹화된 데이터를 하나의 행(row)처럼 취급
+-- author_id로 그룹핑하였으면, 그외의 컬럼을 조회하는것은 적절치 않음
+select author_id from post group by author_id;
+-- group by 와 집계함수
+-- 아래 쿼리에서 *은 그룹화된 데이터내에서의 개수
+select author_id, coutn(*) from post group by author_id;
+--author의 email과 author 별로 본인이 쓴 글의 개수를 출력
+--join과 group by, 집계함수 활용한 글의 개수 출력
+select a.email, (select count(*) from post where author_id=a.id) from author a;
+select a.email, count(p.id) from author a left join post p on p.author_id = a.id group by a.email;
+
+-- where 와 group by
+-- 연도별 post 글의 개수 출력, 연도가 null인 값은 제외
+select date_format(p.created_time,'%Y')as year, count(*) 
+from post p
+where created_time is not null
+group by year;
+
+-- 자동차 종율 별 특정 옵션이 포함된 자동차 수 구하기
+SELECT car_type, count(*) cars
+from car_rental_company_car
+where options like '%통풍시트%' ||  options like '%열선시트%' || options like '%가죽시트%'
+group by car_type
+order by car_type;
+
+-- 입양 시각 구하기(1)
+SELECT date_format(datetime,'%H') hour, count(*) count
+from animal_outs
+where date_format(datetime,'%H-%i')>='09-00' && date_format(datetime,'%H-%i')<='19-59'
+group by hour
+order by hour;
+
+-- having : group by를 통해 나온 집계값에 대한 조건
+-- 글을 2개 이상 쓴 사람에 대한 정보조회
+select author_id from post group by author_id having count(*)>=2;
+select author_id , count(*) count from post group by author_id having count>=2;
+
+-- 동명 동물 수 찾기
+SELECT name, count(*) count
+from animal_ins
+where name is not null
+group by name
+having count >=2
+order by name;
+
+-- 다중명 group by
+-- post에서 작성자가 만든 제목의 개수를 출력하시오
+select author_id, title, count(*) from post group by author_id, title;
+
+-- 재구매가 일어난 상품과 회원 리스트 구하기
+SELECT user_id, product_id from online_sale
+group by user_id,product_id
+having count(*)>=2
+order by user_id, product_id desc;
